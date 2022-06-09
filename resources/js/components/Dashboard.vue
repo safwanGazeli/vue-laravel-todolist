@@ -107,7 +107,8 @@
                     <div class="flex space-x-2 justify-center">
                        
                         <div v-if="todo.is_complete == 1">           
-                        <input type="checkbox" v-model="todo.active" @click="checkboxToggle(todo)" checked> Completed 
+                          <span class="text-xs inline-block py-1 px-2.5 leading-none text-center whitespace-nowrap align-baseline font-bold bg-green-500 text-white rounded-full">Completed</span>
+
                          </div>
                         <div v-else> 
                            <input type="checkbox" v-model="todo.active" @click="checkboxToggle(todo)" > Mark as Complete
@@ -160,6 +161,7 @@
          active: !todo.active
          }).then((response) => {
          console.log(response)
+         this.getTodos()
          })
      },
      deleteTodo(id) {

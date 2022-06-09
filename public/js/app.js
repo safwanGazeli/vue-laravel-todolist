@@ -2298,6 +2298,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   props: ['app'],
   data: function data() {
@@ -2329,29 +2330,33 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     checkboxToggle: function checkboxToggle(todo) {
+      var _this3 = this;
+
       axios.put("/api/".concat(todo.id, "/active"), {
         active: !todo.active
       }).then(function (response) {
         console.log(response);
+
+        _this3.getTodos();
       });
     },
     deleteTodo: function deleteTodo(id) {
-      var _this3 = this;
+      var _this4 = this;
 
       axios.get('/api/delete/todo/' + id).then(function (response) {
         if (response.status >= 200 && response.status < 300) {
           alert(response.data.message);
 
-          _this3.getTodos();
+          _this4.getTodos();
         }
       });
     }
   },
   mounted: function mounted() {
-    var _this4 = this;
+    var _this5 = this;
 
     this.getTodos(), axios.get('/api/user').then(function (res) {
-      _this4.user = res.data;
+      _this5.user = res.data;
     });
     console.log('Component mounted.');
   }
@@ -21174,77 +21179,13 @@ var render = function () {
                                         [
                                           todo.is_complete == 1
                                             ? _c("div", [
-                                                _c("input", {
-                                                  directives: [
-                                                    {
-                                                      name: "model",
-                                                      rawName: "v-model",
-                                                      value: todo.active,
-                                                      expression: "todo.active",
-                                                    },
-                                                  ],
-                                                  attrs: {
-                                                    type: "checkbox",
-                                                    checked: "",
+                                                _c(
+                                                  "span",
+                                                  {
+                                                    staticClass:
+                                                      "text-xs inline-block py-1 px-2.5 leading-none text-center whitespace-nowrap align-baseline font-bold bg-green-500 text-white rounded-full",
                                                   },
-                                                  domProps: {
-                                                    checked: Array.isArray(
-                                                      todo.active
-                                                    )
-                                                      ? _vm._i(
-                                                          todo.active,
-                                                          null
-                                                        ) > -1
-                                                      : todo.active,
-                                                  },
-                                                  on: {
-                                                    click: function ($event) {
-                                                      return _vm.checkboxToggle(
-                                                        todo
-                                                      )
-                                                    },
-                                                    change: function ($event) {
-                                                      var $$a = todo.active,
-                                                        $$el = $event.target,
-                                                        $$c = $$el.checked
-                                                          ? true
-                                                          : false
-                                                      if (Array.isArray($$a)) {
-                                                        var $$v = null,
-                                                          $$i = _vm._i($$a, $$v)
-                                                        if ($$el.checked) {
-                                                          $$i < 0 &&
-                                                            _vm.$set(
-                                                              todo,
-                                                              "active",
-                                                              $$a.concat([$$v])
-                                                            )
-                                                        } else {
-                                                          $$i > -1 &&
-                                                            _vm.$set(
-                                                              todo,
-                                                              "active",
-                                                              $$a
-                                                                .slice(0, $$i)
-                                                                .concat(
-                                                                  $$a.slice(
-                                                                    $$i + 1
-                                                                  )
-                                                                )
-                                                            )
-                                                        }
-                                                      } else {
-                                                        _vm.$set(
-                                                          todo,
-                                                          "active",
-                                                          $$c
-                                                        )
-                                                      }
-                                                    },
-                                                  },
-                                                }),
-                                                _vm._v(
-                                                  " Completed \n                         "
+                                                  [_vm._v("Completed")]
                                                 ),
                                               ])
                                             : _c("div", [
