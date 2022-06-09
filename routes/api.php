@@ -36,9 +36,13 @@ Route::get('todos', [TodoController::class, 'index']);
 
 Route::post('add/todo', [TodoController::class, 'store']);
 
+Route::get('show/todo/{id}', [TodoController::class, 'show']);
+
 Route::get('delete/todo/{id}', [TodoController::class, 'destroy']);
 
 Route::post('update/todo/{id}', [TodoController::class, 'update']);
+
+// Route::put('update/todo/{id}', [TodoController::class, 'update']);
 
 Route::put('/{todo}/active', [TodoController::class, 'makeActive'])->name('admin.category.active');
 
@@ -47,5 +51,7 @@ Route::get('/login', [LoginController::class, 'login']);
 Route::get('files', [FileUploadsController::class, 'index']);
 
 Route::put('/{file}/active', [FileUploadsController::class, 'makeActive'])->name('admin.category.active');
+
+Route::get('displayFile', [TodoController::class, 'displayFile']);
 
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Todos;
 use App\Models\File_uploads;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 class TodoController extends Controller
@@ -36,6 +37,10 @@ class TodoController extends Controller
     
     public function store(Request $request)
     {
+
+            $validatedData = $request->validate([
+                'message' => 'required'
+            ]);
         
             $todos = new Todos;
             $todos->message = $request->message;
@@ -46,23 +51,30 @@ class TodoController extends Controller
             if($request->hasFile("pics")){
                 $files=$request->file("pics");
                 foreach($files as $file){
+                   
+                    $file_uploads = new File_uploads;
                     $imageName= $file->getClientOriginalName();
                     $uploadedFilesName = $file->storeAs('images', $imageName);
                     $fileNameOnly = pathinfo($imageName, PATHINFO_FILENAME);
                     $extension = $file->getClientOriginalExtension();
                     $sizeFile = $file->getSize();
-                    $request['name'] = $fileNameOnly;
-                    $request['extension'] = $extension;
-                    $request['size'] = $sizeFile;
-                    $request['path'] = $uploadedFilesName;
-
                     $file->move(\public_path("/images"),$imageName);
-                    File_uploads::create($request->all());
+                    $file_uploads->name = $fileNameOnly;
+                    $file_uploads->extension = $extension;
+                    $file_uploads->size = $sizeFile;
+                    $file_uploads->path = $uploadedFilesName;
+                    $file_uploads->save();
+        
+                    $data[] = $file_uploads->id; 
+                   
+                  
                 }
+
+                $todos->fileUploads()->sync( $data );
             }
 
             return response()->json([
-                'status' => 'success'
+                'message' => 'Success'
             ]);
     }
 
@@ -75,7 +87,12 @@ class TodoController extends Controller
      */
     public function show($id)
     {
-        //
+    
+        $todos = DB::table('todos')->Where('user_id', $id)->get();
+
+        return response()->json([
+            'todos' => $todos
+        ]);
     }
 
     public function makeActive(Request $request, $id) {
@@ -109,39 +126,41 @@ class TodoController extends Controller
      */
     public function edit($id)
     {
-        //
+         //   
     }
 
 
 
     public function update(Request $request, $id)
     {
-
         $todo = todos::findOrFail($id);
         $todo->message = $request->message;
         $todo->save();
 
         if($request->hasFile("pics")){
             $files=$request->file("pics");
+            
+
             foreach($files as $file){
+                $file_uploads = new File_uploads;
                 $imageName= $file->getClientOriginalName();
                 $uploadedFilesName = $file->storeAs('images', $imageName);
                 $fileNameOnly = pathinfo($imageName, PATHINFO_FILENAME);
                 $extension = $file->getClientOriginalExtension();
                 $sizeFile = $file->getSize();
-                $request['name'] = $fileNameOnly;
-                $request['extension'] = $extension;
-                $request['size'] = $sizeFile;
-                $request['path'] = $uploadedFilesName;
-
                 $file->move(\public_path("/images"),$imageName);
-                File_uploads::create($request->all());
+                $file_uploads->name = $fileNameOnly;
+                $file_uploads->extension = $extension;
+                $file_uploads->size = $sizeFile;
+                $file_uploads->path = $uploadedFilesName;
+                $file_uploads->save();
+    
+                $data[] = $file_uploads->id; 
+                
             }
+            $todo->fileUploads()->sync( $data );
         }
-
-        // RELATIONSHIP MANY TO MANY (TODO_FILE_UPLOADS)
-        $todo->fileUploads()->sync( $request->file_upload_id );
-
+    
 
         return response()->json([
             'status' => 'success'
@@ -149,7 +168,19 @@ class TodoController extends Controller
 
     }
 
+
+    public function displayFile() {
+
+        $todos = Todos::with('fileUploads')->get();
+       
+        return response()->json([
+            'todos' => $todos
+        ]);
+
+
+    }
   
+
 
     /**
      * Remove the specified resource from storage.
@@ -164,7 +195,7 @@ class TodoController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Category deleted succesfully',
+            'message' => 'Are you sure, you want to delete?',
         ]);
     }
 }

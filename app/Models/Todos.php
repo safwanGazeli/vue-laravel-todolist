@@ -10,17 +10,24 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Todos extends Model
 {
     use HasFactory;
+
+    protected $guarded = [];
+    
     protected $fillable = [
         'message',
         'is_complete',
         'user_id',
     ];
 
-    public function Users() {
-        return $this->belongsTo(User::class);
-    }
+    // public function Users() {
+    //     return $this->belongsTo(User::class);
+    // }
 
     public function fileUploads() {
         return $this->belongsToMany(File_uploads::class);
     }
+
+    // public function fileUploads() {
+    //     return $this->hasMany(File_uploads::class);
+    // }
 }

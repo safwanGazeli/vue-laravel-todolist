@@ -37,7 +37,7 @@
   
         <div class="flex items-center lg:ml-auto">
           <button type="button" class="inline-block px-6 py-2.5 mr-2 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out" data-mdb-ripple="true" data-mdb-ripple-color="light"  @click="() => this.$router.push('/dashboard')">Dashboard</button>
-          <button type="button" class="inline-block px-6 py-2.5 mr-2 bg-transparent text-blue-600 font-medium text-xs leading-tight uppercase rounded hover:text-blue-700 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus:ring-0 active:bg-gray-200 transition duration-150 ease-in-out" data-mdb-ripple="true" data-mdb-ripple-color="light"  @click="() => this.$router.push('/addTodos')">Add Task</button>
+          <button type="button" class="inline-block px-6 py-2.5 mr-2 bg-transparent text-blue-600 font-medium text-xs leading-tight uppercase rounded hover:text-blue-700 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus:ring-0 active:bg-gray-200 transition duration-150 ease-in-out" data-mdb-ripple="true" data-mdb-ripple-color="light" v-on:click="() => $router.push({name: 'addTodos', params: {user} })">Add Task</button>
           <button type="button" class="inline-block px-6 py-2.5 mr-2 bg-transparent text-blue-600 font-medium text-xs leading-tight uppercase rounded hover:text-blue-700 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus:ring-0 active:bg-gray-200 transition duration-150 ease-in-out" data-mdb-ripple="true" data-mdb-ripple-color="light" @click.prevent="logout">Logout</button>
         </div>
       </div>
@@ -53,15 +53,17 @@
       <p class="mt-1 max-w-2xl text-sm text-gray-500">Insert the task message with images.</p>
     </div>
     <div class="border-t border-gray-200"></div>
+
+    <div v-if="error">
+      <strong>There was a error save your task</strong>
+    </div>
   <form id="form" class="p-10 ">
    {{ csrf_token }}
    
 
-    <input id="user_id" label="user_id" v-model="user_id" type="hidden" class="form-control">
-
     <div class="form-group mb-6">
       <label for="exampleInputEmail2" class="form-label inline-block mb-2 text-gray-700">Message</label>
-      <input id="input" label="message" v-model="message" type="text" placeholder="Enter category message..." class="form-control
+      <input id="input" name="message" label="message" v-model="message" type="text" placeholder="Enter category message..." class="form-control
         block
         w-full
         px-3
@@ -77,6 +79,9 @@
         m-0
         focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
         >
+        <div class="text-red-500" v-if="errors.message">
+            {{ errors.message[0] }}
+        </div>
     </div>
  
       <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
@@ -111,15 +116,17 @@
 <script>
 
 export default {
-  props: ['app'],
+  props: ['user'],
   data(){
           return {
-              user_id: this.$userId,
               message: '',
               is_complete: '',
               attachments:[],
               form: new FormData,
               csrf_token: '',
+              user : null,
+              user_id: this.user.id,
+              errors: []
           }
 
         },
@@ -164,25 +171,20 @@ export default {
                      } };
                 document.getElementById('upload-file').value=[];
 
-                axios.post('http://localhost:8000/api/add/todo',this.form,config).then(response=>{
+                axios.post('/api/add/todo',this.form,config).then(response=>{
                     //success
                     console.log(response);
                      axios.get('/api/user').then((res)=>{
-                        this.user = res.data
-                        if(this.user.role == 'admin') {
-                            // EventBus.$emit('authCheck')
-                            this.$router.push({ name: "Dashboard"})
-                        }else{
-                            // EventBus.$emit('authCheck')
-                            this.$router.push({ name: "UserDash"})
-                        }
+                       this.$router.push({ name: "Dashboard"})
                         })
                     })
-                    .catch(response=>{
-                        //error
+                     .catch(error =>{
+                        if(error.response.status == 422){
+                          this.errors = error.response.data.errors;
+                        }
                     });
-
-            }
+          
+            },
         },
         mounted() {
             axios.get('/api/user').then((res)=>{

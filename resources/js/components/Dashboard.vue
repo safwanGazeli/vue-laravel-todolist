@@ -37,7 +37,7 @@
   
         <div class="flex items-center lg:ml-auto">
           <button type="button" class="inline-block px-6 py-2.5 mr-2 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out" data-mdb-ripple="true" data-mdb-ripple-color="light"  @click="() => this.$router.push('/dashboard')">Dashboard</button>
-          <button type="button" class="inline-block px-6 py-2.5 mr-2 bg-transparent text-blue-600 font-medium text-xs leading-tight uppercase rounded hover:text-blue-700 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus:ring-0 active:bg-gray-200 transition duration-150 ease-in-out" data-mdb-ripple="true" data-mdb-ripple-color="light"  @click="() => this.$router.push('/addTodos')">Add Task</button>
+          <button type="button" class="inline-block px-6 py-2.5 mr-2 bg-transparent text-blue-600 font-medium text-xs leading-tight uppercase rounded hover:text-blue-700 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus:ring-0 active:bg-gray-200 transition duration-150 ease-in-out" data-mdb-ripple="true" data-mdb-ripple-color="light" v-on:click="() => $router.push({name: 'addTodos', params: {user} })">Add Task</button>
           <button type="button" class="inline-block px-6 py-2.5 mr-2 bg-transparent text-blue-600 font-medium text-xs leading-tight uppercase rounded hover:text-blue-700 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus:ring-0 active:bg-gray-200 transition duration-150 ease-in-out" data-mdb-ripple="true" data-mdb-ripple-color="light" @click.prevent="logout">Logout</button>
         </div>
       </div>
@@ -45,6 +45,7 @@
     </div>
 
      <!-- end navbar -->
+
       <div class="p-6">
       <div class=" rounded-lg bg-gray-500 shadow-lg">
       <div class="">
@@ -70,7 +71,7 @@
                 </tr>
               </thead>
               <tbody  v-for="todo in todos" :key="todo.id" >
-                <tr class="bg-white border-b" v-if="user_id == todo.user_id">
+                <tr class="bg-white border-b">
                   <td class="text-sm text-black font-light px-6 py-4 whitespace-nowrap">
                     {{ todo.message}}
                   </td>
@@ -102,6 +103,18 @@
                       >Delete</button>
                     </div>
                   </td>
+                    <td class="text-sm text-black font-light px-6 py-4 whitespace-nowrap" v-if="user.role == 'user'">
+                    <div class="flex space-x-2 justify-center">
+                       
+                        <div v-if="todo.is_complete == 1">           
+                        <input type="checkbox" v-model="todo.active" @click="checkboxToggle(todo)" checked> Completed 
+                         </div>
+                        <div v-else> 
+                           <input type="checkbox" v-model="todo.active" @click="checkboxToggle(todo)" > Mark as Complete
+                         </div>
+                         <!-- status {{todo.active}} -->
+                    </div>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -124,7 +137,8 @@
      return {
        user_id: this.$userId,
        todos: [],
-       url: window.location.origin
+       url: window.location.origin,
+       user : null
      }
    },
    methods: {
@@ -134,15 +148,22 @@
             })
         },
      getTodos() {
-       axios.get('http://localhost:8000/api/todos').then(response => {
-         if(response.status >= 200 && response.status <300){
-           this.todos = response.data.todos
-         }
-       })
+        axios.get('/api/user').then((res)=>{
+            this.user = res.data
+            axios.get('http://localhost:8000/api/show/todo/'+ this.user.id).then(response => {
+               this.todos = response.data.todos
+            })
+        })
      },
-
+    checkboxToggle (todo) {
+        axios.put(`/api/${todo.id}/active`, {
+         active: !todo.active
+         }).then((response) => {
+         console.log(response)
+         })
+     },
      deleteTodo(id) {
-         axios.get('http://localhost:8000/api/delete/todo/'+id).then(response => {
+         axios.get('/api/delete/todo/'+id).then(response => {
          if(response.status >= 200 && response.status <300){
            alert(response.data.message)
            this.getTodos()
@@ -152,6 +173,9 @@
     },
    mounted() {
      this.getTodos(),
+      axios.get('/api/user').then((res)=>{
+            this.user = res.data
+        })
      console.log('Component mounted.')
    }, 
  }

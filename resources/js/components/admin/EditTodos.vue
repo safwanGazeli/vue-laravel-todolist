@@ -37,7 +37,7 @@
   
         <div class="flex items-center lg:ml-auto">
           <button type="button" class="inline-block px-6 py-2.5 mr-2 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out" data-mdb-ripple="true" data-mdb-ripple-color="light"  @click="() => this.$router.push('/dashboard')">Dashboard</button>
-          <button type="button" class="inline-block px-6 py-2.5 mr-2 bg-transparent text-blue-600 font-medium text-xs leading-tight uppercase rounded hover:text-blue-700 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus:ring-0 active:bg-gray-200 transition duration-150 ease-in-out" data-mdb-ripple="true" data-mdb-ripple-color="light"  @click="() => this.$router.push('/addTodos')">Add Task</button>
+          <button type="button" class="inline-block px-6 py-2.5 mr-2 bg-transparent text-blue-600 font-medium text-xs leading-tight uppercase rounded hover:text-blue-700 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus:ring-0 active:bg-gray-200 transition duration-150 ease-in-out" data-mdb-ripple="true" data-mdb-ripple-color="light" v-on:click="() => $router.push({name: 'addTodos', params: {user} })">Add Task</button>
           <button type="button" class="inline-block px-6 py-2.5 mr-2 bg-transparent text-blue-600 font-medium text-xs leading-tight uppercase rounded hover:text-blue-700 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus:ring-0 active:bg-gray-200 transition duration-150 ease-in-out" data-mdb-ripple="true" data-mdb-ripple-color="light" @click.prevent="logout">Logout</button>
         </div>
       </div>
@@ -75,36 +75,20 @@
         >
     </div>
 
-    <div class="form-group mb-6">
-      <div  v-for="file in files" :key="file.id">
-          <label > ( {{file.id}} ) :</label>
-          <label > {{ file.name }}</label>
+   
+      <div v-for="todo in todos" :key="todo.id">     
+        <div v-if="todo.user_id == user_id"> 
+          <div v-if="todo.id == id"> 
+          <div v-for="format in todo.file_uploads" :key="format.id">
+            <div class="flex justify-start ..." v-if="format.pivot.file_uploads_id == format.id">
+              <img :src="url + '/'+ format.path" style="height:100px; width:100px" alt="">
+              <label class="my-8"> Name : {{format.name}}</label>
+            </div>
+          </div>  
+            </div>  
+        </div>    
       </div>
-    </div>
-
     
-     <div class="form-group mb-6">
-      <label for="exampleInputEmail2" class="form-label inline-block mb-2 text-gray-700">Choose Number from List of File above</label>
-      <input label="file_upload_id" v-model="file_upload_id" type="number" placeholder="Enter File number..." class="form-control
-        block
-        w-full
-        px-3
-        py-1.5
-        text-base
-        font-normal
-        text-gray-700
-        bg-white bg-clip-padding
-        border border-solid border-gray-300
-        rounded
-        transition
-        ease-in-out
-        m-0
-        focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
-        >
-    </div>
-
-
-      <!-- <input label="user_id" v-model="user_id" type="hidden" placeholder="Enter message name..." class="form-control"> -->
 
     
     
@@ -116,7 +100,6 @@
       <div class="flex text-sm text-gray-600">
                       <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
                         <span>Upload a file</span>
-                        <!-- <input id="file-upload" name="file-upload" type="file" class="sr-only" @change="onFileSelected" /> -->
                         <input id="upload-file" type="file" class="form-control" @change="fieldChange" multiple>
           </label>
       </div>
@@ -134,6 +117,7 @@
 </div>
 </template>
 
+
 <script>
 
 export default {
@@ -142,17 +126,20 @@ export default {
     data() {
       return {
         files: [],
+        todos: [],
       }
     },
     data: function() {
       return {
         user_id: this.todo.user_id,
+        id: this.todo.id,
         message: this.todo.message,
-        image: this.todo.image,
-        file_upload_id: this.todo.file_upload_id,
         attachments:[],
         files: [],
+        todos: [],
+        user: null,
         form: new FormData,
+        url: window.location.origin,
         _token: "{{ csrf_token() }}",
       }
     },
@@ -164,9 +151,16 @@ export default {
             })
         },
         getFiles() {
-       axios.get('http://localhost:8000/api/files').then(response => {
+       axios.get('/api/files').then(response => {
          if(response.status >= 200 && response.status <300){
            this.files = response.data.files
+         }
+       })
+     },
+      getDisplayFile() {
+       axios.get('/api/displayFile').then(response => {
+         if(response.status >= 200 && response.status <300){
+           this.todos = response.data.todos
          }
        })
      },
@@ -191,7 +185,6 @@ export default {
                 this.form.append("message", this.message);
                 this.form.append("is_complete", this.is_complete);
                 this.form.append("user_id", this.user_id);
-                this.form.append("file_upload_id", this.file_upload_id);
                 for(let i=0; i<this.attachments.length;i++){
                     this.form.append('pics[]',this.attachments[i]);
                 }
@@ -202,19 +195,19 @@ export default {
 
                 document.getElementById('upload-file').value=[];
 
-                axios.post('http://localhost:8000/api/update/todo/' + this.todo.id ,this.form,config).then(response=>{
+                axios.post('/api/update/todo/' + this.todo.id ,this.form,config).then(response=>{
                     //success
                     console.log(response);
                     this.$router.push({ name: "Dashboard"})
                 })
-                    .catch(response=>{
-                        //error
-                    });
-
-            }
+            },
   },
     mounted() {
      this.getFiles(),
+     this.getDisplayFile(),
+       axios.get('/api/user').then((res)=>{
+            this.user = res.data
+        }),
      console.log('Component mounted.')
    }, 
 

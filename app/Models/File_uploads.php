@@ -17,7 +17,7 @@ class File_uploads extends Model
     ];
 
     public function todos() {
-        return $this->belongsTo(Todos::class);
+        return $this->belongsToMany(Todos::class);
     }
 
 

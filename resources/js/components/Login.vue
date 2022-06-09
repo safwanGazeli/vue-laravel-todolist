@@ -2,13 +2,13 @@
 <div>
  
     <section class="h-screen">
-  <div class="px-6 h-full text-gray-800">
-    <div
-      class="flex xl:justify-center lg:justify-between justify-center items-center flex-wrap h-full g-6"
-    >
-      <div
-        class="grow-0 shrink-1 md:shrink-0 basis-auto xl:w-6/12 lg:w-6/12 md:w-9/12 mb-12 md:mb-0"
-      >
+        <div class="px-6 h-full text-gray-800">
+          <div
+            class="flex xl:justify-center lg:justify-between justify-center items-center flex-wrap h-full g-6"
+          >
+            <div
+              class="grow-0 shrink-1 md:shrink-0 basis-auto xl:w-6/12 lg:w-6/12 md:w-9/12 mb-12 md:mb-0"
+            >
         <img
           src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
           class="w-full"
@@ -27,6 +27,9 @@
               label="email"
               placeholder="Email address"
             />
+            <div class="text-red-500" v-if="errors.email">
+                {{ errors.email[0] }}
+            </div>
           </div>
 
           <!-- Password input -->
@@ -63,8 +66,6 @@
 </template>
 <script>
 
-import EventBus from '../eventBus';
-
 export default {
     data(){
         return{
@@ -79,20 +80,11 @@ export default {
     methods:{
          loginUser(){
              axios.post('/api/login', this.form).then(() =>{
-                //  EventBus.$emit('authCheck')
-                //  this.$router.push({ name: "Index"}); 
                 axios.get('/api/user').then((res)=>{
-            this.user = res.data
-            if(this.user.role == 'admin') {
-                EventBus.$emit('authCheck')
-                this.$router.push({ name: "Dashboard"})
-            }else{
-                EventBus.$emit('authCheck')
-                this.$router.push({ name: "UserDash"})
-            }
+                  this.$router.push({ name: "Dashboard"});
             })
              }).catch((error) =>{
-         this.errors = error.response.data.errors;
+                this.errors = error.response.data.errors;
             })
          }
     }
