@@ -15,7 +15,9 @@ Then you need to install:
 ```npm install```
 
 
-After finishing all the steps above, you need to add a new .env file and set up your database name. Then run to get all the tables using:
+After finishing all the steps above, you need to add a new .env file and set up your database name. Then run to get all the tables and generate App Key using:
+
+```php artisan key:generate```
 
 ```php artisan migrate```
 
