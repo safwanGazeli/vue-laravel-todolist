@@ -1,5 +1,5 @@
 # TODOLIST 
-To run this application you have to clone this repo from instructor below: 
+To run this application you have to clone this repo from instructions below: 
 
 ### Clone: 
 
