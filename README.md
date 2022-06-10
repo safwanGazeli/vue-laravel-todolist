@@ -3,21 +3,21 @@ To run this application you have to clone this repo from instructions below:
 
 ### Clone: 
 
-git clone --single-branch --branch master https://github.com/safwanGazeli/vue-laravel-todolist.git
+```git clone --single-branch --branch master https://github.com/safwanGazeli/vue-laravel-todolist.git```
 
 
 ### Install : 
 
 Then you need to install: 
 
-composer install
+```composer install```
 
-npm install 
+```npm install```
 
 
 After finish all the step above, you need to add a new .env file and setup your database name. Then run to get all the tables using:
 
-php artisan migrate
+```php artisan migrate```
 
 
 ### API
