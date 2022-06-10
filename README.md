@@ -10,7 +10,7 @@ git clone --single-branch --branch master https://github.com/safwanGazeli/vue-la
 
 Then you need to install: 
 
-composer install / composer i
+composer install
 
 npm install 
 
